@@ -11,7 +11,8 @@ import (
 func handle(conn net.Conn) {
 	scan := bufio.NewReader(conn)
 	for {
-		msg, err := scan.ReadString('\n')
+		msg, err := scan.ReadString('\n') // recv
+		msg = encrypt(msg)
 		if err != nil {
 			print(err)
 			break
@@ -55,7 +56,9 @@ func Connect(ip string, port string) {
 			conn.Close()
 			break
 		}
-		_, err = fmt.Fprintf(conn, "%s> %s", nick, msg)
+		msg = nick + "> " + msg
+		msg = encrypt(msg)
+		_, err = fmt.Fprintf(conn, "%s", msg)
 		if err != nil {
 			fmt.Println("Connection lost...")
 			conn.Close()

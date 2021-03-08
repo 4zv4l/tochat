@@ -47,6 +47,7 @@ func handlec(conn net.Conn) {
 	scan := bufio.NewReader(conn)
 	for {
 		cmsg, err := scan.ReadString('\n')
+		cmsg = encrypt(cmsg)
 		if err != nil {
 			print(err)
 			break
@@ -60,7 +61,8 @@ func handlec(conn net.Conn) {
 			}
 			conn.Close()
 		} else {
-			fmt.Fprintf(f, "%s>%s", conn.LocalAddr().String(), cmsg)
+			fmt.Fprintf(f, "%s", cmsg)
+			cmsg = encrypt(cmsg)
 			for _, e = range client { // send the message to all other client
 				if e == conn {
 
@@ -72,6 +74,7 @@ func handlec(conn net.Conn) {
 	}
 }
 
+// show all messages sent
 func show_msg() {
 	s := bufio.NewScanner(os.Stdin)
 	var m []byte
@@ -95,12 +98,14 @@ func show_msg() {
 	}
 }
 
+// show clients and allow to kick them from the server
 func sclose(l net.Listener) {
 	scan := bufio.NewScanner(os.Stdin)
+	km := encrypt("Server is now down...\n")
 	var n string
 	for {
-		for i, e := range client {
-			fmt.Println(i+1, e.LocalAddr())
+		for i, e := range client { // list all clients
+			fmt.Println(i+1, e.RemoteAddr())
 		}
 		fmt.Print("to kick> ")
 		scan.Scan()
@@ -110,16 +115,16 @@ func sclose(l net.Listener) {
 			fmt.Println("Number not on the list...")
 			break
 		}
-		if n == -1 {
+		if n == -1 { // quit the menu
 			break
-		} else if n > len(client) {
+		} else if n > len(client) { // verify is the client number is ok
 			fmt.Println("Number not on the list...")
 		} else if n < 1 {
 			fmt.Println("Number not on the list...")
 		} else {
 			for i, e := range client {
 				if i+1 == n {
-					e.Write([]byte("Server is now down...\n"))
+					e.Write([]byte(km)) // send the kick message
 					client = remove(client, i)
 					e.Close()
 				}
@@ -158,7 +163,7 @@ func Serv(port string) {
 		Clear()
 		fmt.Print("Command (h for help)> ")
 		scan.Scan()
-		if scan.Text() == "h" {
+		if scan.Text() == "h" { // show the help
 			Clear()
 			fmt.Print(`Usage:
 	l to list and kill client
@@ -167,18 +172,18 @@ func Serv(port string) {
 	-1 to stop the server or stop the command`)
 			fmt.Print("\nPress Enter to continue...")
 			fmt.Scanln()
-		} else if scan.Text() == "l" {
+		} else if scan.Text() == "l" { // show clients
 			Clear()
 			sclose(l)
-		} else if scan.Text() == "m" {
+		} else if scan.Text() == "m" { // show messages
 			show_msg()
-		} else if scan.Text() == "ip" {
+		} else if scan.Text() == "ip" { //show server ip and port
 			Clear()
 			fmt.Println("[+]Your ip is", GetLocalIP())
 			fmt.Println("[+]Listening on port", port+"...")
 			fmt.Print("Press Enter to continue...")
 			fmt.Scanln()
-		} else if scan.Text() == "-1" {
+		} else if scan.Text() == "-1" { // close the server
 			f.Close()
 			os.Remove(path + "/.tochat")
 			for _, e := range client {

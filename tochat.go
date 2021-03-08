@@ -1,44 +1,48 @@
 package main
 
 import (
-	"./pkg"
 	"bufio"
 	"fmt"
 	"os"
 	"time"
+	"tochat/pkg"
 )
 
+var vers string
+
+// show help
 func help() {
 	pkg.Clear()
 	fmt.Println(`Usage :
   -1 to quit
   s to start as server
   c to start as client`)
+	fmt.Println("Version :", vers)
 	fmt.Print("Press Enter to continue...")
 	fmt.Scanln()
 }
 
 func main() {
 	for {
-		pkg.Clear()
+		pkg.Clear() // clear the screen
 		scan := bufio.NewScanner(os.Stdin)
 		fmt.Println("To chat (h for help):")
 		fmt.Print("> ")
 		scan.Scan()
 		if scan.Text() == "h" {
-			help()
-		} else if scan.Text() == "s" {
+			help() // show help
+		} else if scan.Text() == "s" { // enter server mod
 			fmt.Print("port> ")
 			scan.Scan()
 			pkg.Serv(scan.Text())
-		} else if scan.Text() == "c" {
+		} else if scan.Text() == "c" { // enter client mod
 			fmt.Print("ip> ")
 			scan.Scan()
 			ip := scan.Text()
 			fmt.Print("port> ")
 			scan.Scan()
 			pkg.Connect(ip, scan.Text())
-		} else if scan.Text() == "-1" {
+		} else if scan.Text() == "-1" { // quit
 			os.Exit(0)
 		} else {
 			print("Not a good parameter...")
