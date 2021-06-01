@@ -11,9 +11,9 @@ import (
 )
 
 // list of clients connected
-var client []net.Conn
-var path, _ = os.UserHomeDir()
-var f, _ = os.OpenFile(path+"/.tochat", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0600)
+var client []net.Conn                                                            // array of clients
+var path, _ = os.UserHomeDir()                                                   // path to home user
+var f, _ = os.OpenFile(path+"/.tochat", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0600) // file to write messages to
 
 // remove element from array
 func remove(slice []net.Conn, s int) []net.Conn {
@@ -37,12 +37,12 @@ func GetLocalIP() string {
 	return ""
 }
 
+// handle client
+// receive a net.Conn
+// write message receive to a file and to all others clients
 func handlec(conn net.Conn) {
 	// defer close conn
-	defer func() {
-		//fmt.Println(conn, "closed...")
-		conn.Close()
-	}()
+	defer conn.Close()
 	var e net.Conn
 	scan := bufio.NewReader(conn)
 	for {
@@ -75,6 +75,7 @@ func handlec(conn net.Conn) {
 }
 
 // show all messages sent
+// read them from a file
 func show_msg() {
 	s := bufio.NewScanner(os.Stdin)
 	var m []byte
@@ -82,7 +83,7 @@ func show_msg() {
 		Clear()
 		m, _ = ioutil.ReadFile(string(path) + "/.tochat")
 		fmt.Println(string(m))
-		fmt.Print("(h for help)> ")
+		fmt.Print("Messages (h for help)> ")
 		s.Scan()
 		if s.Text() == "-1" {
 			break
@@ -99,6 +100,8 @@ func show_msg() {
 }
 
 // show clients and allow to kick them from the server
+// loop into client array and show their ip
+// and give you a prompt to kick clients
 func sclose(l net.Listener) {
 	scan := bufio.NewScanner(os.Stdin)
 	km := encrypt("Server is now down...\n")
@@ -133,6 +136,8 @@ func sclose(l net.Listener) {
 	}
 }
 
+// accept connections (loop)
+// receive a net.Listener -> Server Listening
 func accept(l net.Listener) {
 	for { //infinite loop handle connection
 		conn, err := l.Accept()
@@ -145,6 +150,7 @@ func accept(l net.Listener) {
 }
 
 // start server
+// Listen and show the menu to interact with clients
 func Serv(port string) {
 	l, err := net.Listen("tcp", ":"+port) // create listener
 	if err != nil {
@@ -154,7 +160,7 @@ func Serv(port string) {
 	defer func() { // defer to close the server
 		l.Close()
 		//fmt.Println("Connection closed...")
-		os.Exit(0)
+		//os.Exit(0)
 	}()
 	Clear()
 	scan := bufio.NewScanner(os.Stdin)
@@ -172,7 +178,7 @@ func Serv(port string) {
 	-1 to stop the server or stop the command`)
 			fmt.Print("\nPress Enter to continue...")
 			fmt.Scanln()
-		} else if scan.Text() == "l" { // show clients
+		} else if scan.Text() == "l" { // show clients and allows to kick them
 			Clear()
 			sclose(l)
 		} else if scan.Text() == "m" { // show messages
@@ -184,12 +190,12 @@ func Serv(port string) {
 			fmt.Print("Press Enter to continue...")
 			fmt.Scanln()
 		} else if scan.Text() == "-1" { // close the server
-			f.Close()
-			os.Remove(path + "/.tochat")
-			for _, e := range client {
+			f.Close()                    // close the file that keep the messages
+			os.Remove(path + "/.tochat") // remove that file
+			for _, e := range client {   // deconnect all clients
 				e.Write([]byte("Server is now down...\n"))
 				l.Close()
-				os.Exit(0)
+				//os.Exit(0)
 			}
 			break
 		}

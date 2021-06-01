@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+// Handle Server incoming data
+// Exit of the recieved message is "Server is now down...\n"
 func handle(conn net.Conn) {
 	scan := bufio.NewReader(conn)
 	for {
@@ -45,7 +47,7 @@ func Connect(ip string, port string) {
 	fmt.Println()
 	for {
 		go handle(conn)
-		scan := bufio.NewReader(os.Stdin)
+		scan := bufio.NewReader(os.Stdin) // sending data part
 		fmt.Print("> ")
 		msg, err := scan.ReadString('\n')
 		if err != nil {

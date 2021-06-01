@@ -17,15 +17,15 @@ func help() {
   -1 to quit
   s to start as server
   c to start as client`)
-	fmt.Println("Version :", vers)
-	fmt.Print("Press Enter to continue...")
+	fmt.Print("\nVersion : ", vers, "\n\n")
+	fmt.Println("Press Enter to continue...")
 	fmt.Scanln()
 }
 
 func main() {
-	for {
+	scan := bufio.NewScanner(os.Stdin)
+	for scan.Text() != "-1" {
 		pkg.Clear() // clear the screen
-		scan := bufio.NewScanner(os.Stdin)
 		fmt.Println("To chat (h for help):")
 		fmt.Print("> ")
 		scan.Scan()
@@ -45,8 +45,8 @@ func main() {
 		} else if scan.Text() == "-1" { // quit
 			os.Exit(0)
 		} else {
-			print("Not a good parameter...")
-			time.Sleep(2 * time.Second)
+			fmt.Printf("%s: Not a good command...", scan.Text())
+			time.Sleep(1 * time.Second)
 		}
 	}
 }
