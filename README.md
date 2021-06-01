@@ -1,2 +1,1 @@
-# tochat
-Chat server/client in Go
+* Chat in go
