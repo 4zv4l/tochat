@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
@@ -42,5 +41,5 @@ func encrypt(input string) string {
 			result = append(result, ' ')
 		}
 	}
-	return fmt.Sprintf(string(result[:]))
+	return string(result[:])
 }

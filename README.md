@@ -6,3 +6,6 @@ tochat is a client/server golang program allowing to communicate between many cl
 # How to build ?
 `go build tochat.go`
 that simple^^
+
+And if you want to build it for Windows/Linux/Mac
+can simply use `make`
